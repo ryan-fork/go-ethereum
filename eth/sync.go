@@ -160,7 +160,7 @@ func (pm *ProtocolManager) syncer() {
 	}
 }
 
-// synchronise tries to sync up our local block chain with a remote peer.
+// synchronise tries to sync up our local block chain with a remote peer. 尝试将我们的本地块链与远程对等体同步
 func (pm *ProtocolManager) synchronise(peer *peer) {
 	// Short circuit if no peers are available
 	if peer == nil {

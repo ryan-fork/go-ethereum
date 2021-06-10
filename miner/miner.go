@@ -76,18 +76,18 @@ func New(eth Backend, config *params.ChainConfig, mux *event.TypeMux, engine con
 // the loop is exited. This to prevent a major security vuln where external parties can DOS you with blocks
 // and halt your mining operation for as long as the DOS continues.
 func (self *Miner) update() {
-	events := self.mux.Subscribe(downloader.StartEvent{}, downloader.DoneEvent{}, downloader.FailedEvent{})
+	events := self.mux.Subscribe(downloader.StartEvent{}, downloader.DoneEvent{}, downloader.FailedEvent{}) //订阅事件
 out:
 	for ev := range events.Chan() {
 		switch ev.Data.(type) {
-		case downloader.StartEvent:
+		case downloader.StartEvent:									//本节点正在从其他节点下载新区块
 			atomic.StoreInt32(&self.canStart, 0)
 			if self.Mining() {
 				self.Stop()
 				atomic.StoreInt32(&self.shouldStart, 1)
 				log.Info("Mining aborted due to sync")
 			}
-		case downloader.DoneEvent, downloader.FailedEvent:
+		case downloader.DoneEvent, downloader.FailedEvent:			//无论下载成功或失败-此时都可以开始挖掘新区块
 			shouldStart := atomic.LoadInt32(&self.shouldStart) == 1
 
 			atomic.StoreInt32(&self.canStart, 1)
@@ -96,7 +96,7 @@ out:
 				self.Start(self.coinbase)
 			}
 			// unsubscribe. we're only interested in this event once
-			events.Unsubscribe()
+			events.Unsubscribe()										//取消订阅
 			// stop immediately and ignore all further pending events
 			break out
 		}
@@ -108,14 +108,14 @@ func (self *Miner) Start(coinbase common.Address) {
 	self.SetEtherbase(coinbase)
 
 	if atomic.LoadInt32(&self.canStart) == 0 {
-		log.Info("Network syncing, will start miner afterwards")
+		log.Info("Network syncing, will start miner afterwards")	//网络同步，之后将开始采矿
 		return
 	}
 	atomic.StoreInt32(&self.mining, 1)
 
 	log.Info("Starting mining operation")
 	self.worker.start()
-	self.worker.commitNewWork()
+	self.worker.commitNewWork()	//启动挖矿时
 }
 
 func (self *Miner) Stop() {

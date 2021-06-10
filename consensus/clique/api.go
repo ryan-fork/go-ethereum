@@ -47,6 +47,7 @@ func (api *API) GetSnapshot(number *rpc.BlockNumber) (*Snapshot, error) {
 }
 
 // GetSnapshotAtHash retrieves the state snapshot at a given block.
+//检索给定块的状态快照。
 func (api *API) GetSnapshotAtHash(hash common.Hash) (*Snapshot, error) {
 	header := api.chain.GetHeaderByHash(hash)
 	if header == nil {
@@ -56,6 +57,7 @@ func (api *API) GetSnapshotAtHash(hash common.Hash) (*Snapshot, error) {
 }
 
 // GetSigners retrieves the list of authorized signers at the specified block.
+//检索指定块的授权签名者列表。
 func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
 	// Retrieve the requested block number (or current if none requested)
 	var header *types.Header
@@ -76,6 +78,7 @@ func (api *API) GetSigners(number *rpc.BlockNumber) ([]common.Address, error) {
 }
 
 // GetSignersAtHash retrieves the state snapshot at a given block.
+//检索给定块的状态快照。
 func (api *API) GetSignersAtHash(hash common.Hash) ([]common.Address, error) {
 	header := api.chain.GetHeaderByHash(hash)
 	if header == nil {
@@ -89,6 +92,7 @@ func (api *API) GetSignersAtHash(hash common.Hash) ([]common.Address, error) {
 }
 
 // Proposals returns the current proposals the node tries to uphold and vote on.
+//返回节点试图维护并投票的当前提案。
 func (api *API) Proposals() map[common.Address]bool {
 	api.clique.lock.RLock()
 	defer api.clique.lock.RUnlock()
@@ -102,15 +106,19 @@ func (api *API) Proposals() map[common.Address]bool {
 
 // Propose injects a new authorization proposal that the signer will attempt to
 // push through.
+//建议注入签名者将尝试的新授权提议
+// 推动通过。
 func (api *API) Propose(address common.Address, auth bool) {
 	api.clique.lock.Lock()
-	defer api.clique.lock.Unlock()
+	defer api.clique.lock.Unlock()				//defer用于资源的释放，会在函数返回之前进行调用
 
 	api.clique.proposals[address] = auth
 }
 
 // Discard drops a currently running proposal, stopping the signer from casting
 // further votes (either for or against).
+//丢弃当前正在运行的提议，停止签名者进行投射
+//进一步投票（赞成或反对）。
 func (api *API) Discard(address common.Address) {
 	api.clique.lock.Lock()
 	defer api.clique.lock.Unlock()

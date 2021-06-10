@@ -21,6 +21,7 @@ import (
 	"crypto/ecdsa"
 	"math/big"
 	"testing"
+	"fmt"					//wcc
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
@@ -89,6 +90,7 @@ func (r *testerChainReader) GetHeaderByNumber(number uint64) *types.Header {
 
 // Tests that voting is evaluated correctly for various simple and complex scenarios.
 func TestVoting(t *testing.T) {
+	fmt.Println("-------------我是条分隔线-------")		//wcc
 	// Define the various voting scenarios to test
 	tests := []struct {
 		epoch   uint64

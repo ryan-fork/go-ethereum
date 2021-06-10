@@ -995,6 +995,8 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 // wrong.
 //
 // After insertion is done, all accumulated events will be fired.
+// InsertChain尝试将给定的一批块插入到规范链中，否则，创建一个fork。 如果返回错误，它将返回失败块的索引号以及描述错误的错误。
+// 插入完成后，将触发所有累积的事件。
 func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	n, events, logs, err := bc.insertChain(chain)
 	bc.PostChainEvents(events, logs)
@@ -1004,6 +1006,7 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 // insertChain will execute the actual chain insertion and event aggregation. The
 // only reason this method exists as a separate one is to make locking cleaner
 // with deferred statements.
+// 将执行实际的链插入和事件聚合。 此方法作为单独方法存在的唯一原因是使用延迟语句使锁定更清晰
 func (bc *BlockChain) insertChain(chain types.Blocks) (int, []interface{}, []*types.Log, error) {
 	// Sanity check that we have something meaningful to import
 	if len(chain) == 0 {
@@ -1190,7 +1193,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks) (int, []interface{}, []*ty
 	}
 	// Append a single chain head event if we've progressed the chain
 	if lastCanon != nil && bc.CurrentBlock().Hash() == lastCanon.Hash() {
-		events = append(events, ChainHeadEvent{lastCanon})
+		events = append(events, ChainHeadEvent{lastCanon})	//区块验证有效插入到区块链后，会产生ChainHeadEvent事件
 	}
 	return 0, events, coalescedLogs, nil
 }

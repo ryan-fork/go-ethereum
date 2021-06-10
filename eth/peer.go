@@ -67,6 +67,7 @@ type PeerInfo struct {
 }
 
 // propEvent is a block propagation, waiting for its turn in the broadcast queue.
+// propEvent是一个块传播，在广播队列中等待轮到它。
 type propEvent struct {
 	block *types.Block
 	td    *big.Int
@@ -88,7 +89,7 @@ type peer struct {
 	knownTxs    *set.Set                  // Set of transaction hashes known to be known by this peer
 	knownBlocks *set.Set                  // Set of block hashes known to be known by this peer
 	queuedTxs   chan []*types.Transaction // Queue of transactions to broadcast to the peer
-	queuedProps chan *propEvent           // Queue of blocks to broadcast to the peer
+	queuedProps chan *propEvent           // Queue of blocks to broadcast to the peer	要向同级广播的块的队列
 	queuedAnns  chan *types.Block         // Queue of blocks to announce to the peer
 	term        chan struct{}             // Termination channel to stop the broadcaster
 }

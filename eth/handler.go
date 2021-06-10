@@ -206,15 +206,15 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	// broadcast transactions
 	pm.txsCh = make(chan core.NewTxsEvent, txChanSize)
 	pm.txsSub = pm.txpool.SubscribeNewTxsEvent(pm.txsCh)
-	go pm.txBroadcastLoop()
+	go pm.txBroadcastLoop() //广播新出现的交易对象
 
-	// broadcast mined blocks
+	// broadcast mined blocks 广播开采区块
 	pm.minedBlockSub = pm.eventMux.Subscribe(core.NewMinedBlockEvent{})
-	go pm.minedBroadcastLoop()
+	go pm.minedBroadcastLoop() //广播新挖掘出的区块
 
 	// start sync handlers
-	go pm.syncer()
-	go pm.txsyncLoop()
+	go pm.syncer()     //定时与相邻个体进行区块全链的强制同步
+	go pm.txsyncLoop() //将新出现的交易对象均匀的同步给相邻个体
 }
 
 func (pm *ProtocolManager) Stop() {
@@ -632,7 +632,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		}
 
 	case msg.Code == NewBlockMsg:
-		// Retrieve and decode the propagated block
+		// Retrieve and decode the propagated block	检索并解码传播的块
 		var request newBlockData
 		if err := msg.Decode(&request); err != nil {
 			return errResp(ErrDecode, "%v: %v", msg, err)
@@ -640,12 +640,13 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		request.Block.ReceivedAt = msg.ReceivedAt
 		request.Block.ReceivedFrom = p
 
-		// Mark the peer as owning the block and schedule it for import
+		// Mark the peer as owning the block and schedule it for import	//将对等体标记为拥有该块并将其安排进行导入
 		p.MarkBlock(request.Block.Hash())
 		pm.fetcher.Enqueue(p.id, request.Block)
 
 		// Assuming the block is importable by the peer, but possibly not yet done so,
 		// calculate the head hash and TD that the peer truly must have.
+		// 计算对等方真正必须具有的头部哈希值和TD值。
 		var (
 			trueHead = request.Block.ParentHash()
 			trueTD   = new(big.Int).Sub(request.TD, request.Block.Difficulty())
@@ -659,7 +660,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			// scenario should easily be covered by the fetcher.
 			currentBlock := pm.blockchain.CurrentBlock()
 			if trueTD.Cmp(pm.blockchain.GetTd(currentBlock.Hash(), currentBlock.NumberU64())) > 0 {
-				go pm.synchronise(p)
+				go pm.synchronise(p) //尝试将我们的本地块链与远程对等体同步
 			}
 		}
 
@@ -690,7 +691,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 
 // BroadcastBlock will either propagate a block to a subset of it's peers, or
 // will only announce it's availability (depending what's requested).
-func (pm *ProtocolManager) BroadcastBlock(block *types.Block, propagate bool) {
+func (pm *ProtocolManager) BroadcastBlock(block *types.Block, propagate bool) { //广播区块
 	hash := block.Hash()
 	peers := pm.peers.PeersWithoutBlock(hash)
 
@@ -707,7 +708,7 @@ func (pm *ProtocolManager) BroadcastBlock(block *types.Block, propagate bool) {
 		// Send the block to a subset of our peers
 		transfer := peers[:int(math.Sqrt(float64(len(peers))))]
 		for _, peer := range transfer {
-			peer.AsyncSendNewBlock(block, td)
+			peer.AsyncSendNewBlock(block, td)  //异步发送新区块
 		}
 		log.Trace("Propagated block", "hash", hash, "recipients", len(transfer), "duration", common.PrettyDuration(time.Since(block.ReceivedAt)))
 		return

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
+//定义了数据库的接口
 package ethdb
 
 // Code using batches should try to add this much data to the batch.
@@ -21,11 +22,13 @@ package ethdb
 const IdealBatchSize = 100 * 1024
 
 // Putter wraps the database write operation supported by both batches and regular databases.
+//Putter接口定义了批量操作和普通操作的写入接口
 type Putter interface {
 	Put(key []byte, value []byte) error
 }
 
 // Database wraps all database operations. All methods are safe for concurrent use.
+//数据库接口定义了所有的数据库操作， 所有的方法都是多线程安全的。
 type Database interface {
 	Putter
 	Get(key []byte) ([]byte, error)
@@ -37,6 +40,7 @@ type Database interface {
 
 // Batch is a write-only database that commits changes to its host database
 // when Write is called. Batch cannot be used concurrently.
+//批量操作接口，不能多线程同时使用，当Write方法被调用的时候，数据库会提交写入的更改。
 type Batch interface {
 	Putter
 	ValueSize() int // amount of data in the batch

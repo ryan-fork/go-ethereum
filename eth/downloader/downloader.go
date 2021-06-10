@@ -339,7 +339,7 @@ func (d *Downloader) Synchronise(id string, head common.Hash, td *big.Int, mode 
 // synchronise will select the peer and use it for synchronising. If an empty string is given
 // it will use the best peer possible and synchronize if its TD is higher than our own. If any of the
 // checks fail an error will be returned. This method is synchronous
-func (d *Downloader) synchronise(id string, hash common.Hash, td *big.Int, mode SyncMode) error {
+func (d *Downloader) synchronise(id string, hash common.Hash, td *big.Int, mode SyncMode) error { //同步
 	// Mock out the synchronisation if testing
 	if d.synchroniseMock != nil {
 		return d.synchroniseMock(id, hash)
@@ -401,6 +401,7 @@ func (d *Downloader) synchronise(id string, hash common.Hash, td *big.Int, mode 
 
 // syncWithPeer starts a block synchronization based on the hash chain from the
 // specified peer and head hash.
+// 根据指定对等体和头部哈希中的哈希链启动块同步
 func (d *Downloader) syncWithPeer(p *peerConnection, hash common.Hash, td *big.Int) (err error) {
 	d.mux.Post(StartEvent{})
 	defer func() {
@@ -1323,6 +1324,7 @@ func (d *Downloader) processHeaders(origin uint64, pivot uint64, td *big.Int) er
 }
 
 // processFullSyncContent takes fetch results from the queue and imports them into the chain.
+// 从队列中获取结果并将其导入链中
 func (d *Downloader) processFullSyncContent() error {
 	for {
 		results := d.queue.Results(true)
@@ -1453,7 +1455,7 @@ func (d *Downloader) processFastSyncContent(latest *types.Header) error {
 				continue
 			}
 		}
-		// Fast sync done, pivot commit done, full import
+		// Fast sync done, pivot commit done, full import	完成快速同步，完成枢轴提交，完全导入
 		if err := d.importBlockResults(afterP); err != nil {
 			return err
 		}

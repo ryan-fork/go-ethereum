@@ -665,7 +665,7 @@ func (f *Fetcher) insert(peer string, block *types.Block) {
 			f.dropPeer(peer)
 			return
 		}
-		// Run the actual import and log any issues
+		// Run the actual import and log any issues	运行实际导入并记录任何问题
 		if _, err := f.insertChain(types.Blocks{block}); err != nil {
 			log.Debug("Propagated block import failed", "peer", peer, "number", block.Number(), "hash", hash, "err", err)
 			return
